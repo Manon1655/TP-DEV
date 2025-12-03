@@ -3,6 +3,18 @@ let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 const taskInput = document.getElementById("taskInput");
 const addBtn = document.getElementById("addBtn");
 
+const resetBtn = document.createElement("button");
+resetBtn.textContent = "Réinitialiser";
+resetBtn.style.marginLeft = "10px";
+resetBtn.style.padding = "12px 18px";
+resetBtn.style.borderRadius = "12px";
+resetBtn.style.border = "none";
+resetBtn.style.background = "#4a2e07ff";
+resetBtn.style.color = "#fff";
+resetBtn.style.cursor = "pointer";
+resetBtn.style.fontWeight = "700";
+addBtn.parentNode.appendChild(resetBtn);
+
 const todoList = document.getElementById("todo");
 const doingList = document.getElementById("doing");
 const doneList = document.getElementById("done");
@@ -26,6 +38,15 @@ addBtn.addEventListener("click", () => {
     saveAndRender();
 });
 
+resetBtn.addEventListener("click", () => {
+    const confirmed = confirm("Voulez-vous vraiment supprimer toutes les tâches terminées ?");
+    if (confirmed) {
+        tasks = tasks.filter(t => t.status !== "done");
+        saveAndRender();
+        alert("Les tâches terminées ont été supprimées !");
+    }
+});
+
 function getTimestamp() {
     const now = new Date();
     const days = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
@@ -36,7 +57,6 @@ function getTimestamp() {
 }
 
 function renderTasks() {
-
     todoList.innerHTML = "";
     doingList.innerHTML = "";
     doneList.innerHTML = "";
@@ -53,7 +73,6 @@ function renderTasks() {
             </div>
         `;
 
-        // Ajouter les boutons seulement si la tâche n'est pas terminée
         if (task.status !== "done") {
             const buttons = document.createElement("div");
 
@@ -61,8 +80,15 @@ function renderTasks() {
             validateBtn.className = "validate";
             validateBtn.textContent = "✔";
             validateBtn.addEventListener("click", () => {
+
+                if (task.status === "todo" && tasks.some(t => t.status === "doing")) {
+                    alert("Vous devez d'abord terminer la tâche en cours !");
+                    return;
+                }
+
                 if (task.status === "todo") task.status = "doing";
                 else if (task.status === "doing") task.status = "done";
+
                 saveAndRender();
             });
 
